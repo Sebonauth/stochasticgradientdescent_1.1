@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>McCulloch-Pitts Neuron Interactive Visualization</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        #controls {
+            width: 80%;
+            margin: 0 auto;
+        }
+
+        .slider-container {
+            margin: 10px 0;
+        }
+
+        label {
+            display: inline-block;
+            width: 120px;
+            text-align: right;
+            margin-right: 10px;
+        }
+
+        input[type=range] {
+            width: 300px;
+        }
+
+        #neuronCanvas {
+            border: 1px solid #ccc;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>McCulloch-Pitts Neuron Model Interactive Visualization</h1>
+
+    <div id="controls">
+        <h2>Adjust Inputs and Parameters</h2>
+        <div class="slider-container">
+            <label for="x1">Input x₁:</label>
+            <input type="range" id="x1" min="0" max="1" step="1" value="1">
+            <span id="x1-value">1</span>
+        </div>
+        <div class="slider-container">
+            <label for="x2">Input x₂:</label>
+            <input type="range" id="x2" min="0" max="1" step="1" value="0">
+            <span id="x2-value">0</span>
+        </div>
+        <div class="slider-container">
+            <label for="x3">Input x₃:</label>
+            <input type="range" id="x3" min="0" max="1" step="1" value="1">
+            <span id="x3-value">1</span>
+        </div>
+        <div class="slider-container">
+            <label for="w1">Weight w₁:</label>
+            <input type="range" id="w1" min="-5" max="5" step="0.5" value="2">
+            <span id="w1-value">2</span>
+        </div>
+        <div class="slider-container">
+            <label for="w2">Weight w₂:</label>
+            <input type="range" id="w2" min="-5" max="5" step="0.5" value="-1">
+            <span id="w2-value">-1</span>
+        </div>
+        <div class="slider-container">
+            <label for="w3">Weight w₃:</label>
+            <input type="range" id="w3" min="-5" max="5" step="0.5" value="1">
+            <span id="w3-value">1</span>
+        </div>
+        <div class="slider-container">
+            <label for="theta">Threshold θ:</label>
+            <input type="range" id="theta" min="-5" max="5" step="0.5" value="2">
+            <span id="theta-value">2</span>
+        </div>
+    </div>
+
+    <canvas id="neuronCanvas" width="800" height="600"></canvas>
+
+    <script>
+        // Get references to HTML elements
+        const x1Slider = document.getElementById('x1');
+        const x2Slider = document.getElementById('x2');
+        const x3Slider = document.getElementById('x3');
+        const w1Slider = document.getElementById('w1');
+        const w2Slider = document.getElementById('w2');
+        const w3Slider = document.getElementById('w3');
+        const thetaSlider = document.getElementById('theta');
+
+        const x1Value = document.getElementById('x1-value');
+        const x2Value = document.getElementById('x2-value');
+        const x3Value = document.getElementById('x3-value');
+        const w1Value = document.getElementById('w1-value');
+        const w2Value = document.getElementById('w2-value');
+        const w3Value = document.getElementById('w3-value');
+        const thetaValue = document.getElementById('theta-value');
+
+        const canvas = document.getElementById('neuronCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Initialize values
+        let x1 = parseInt(x1Slider.value);
+        let x2 = parseInt(x2Slider.value);
+        let x3 = parseInt(x3Slider.value);
+        let w1 = parseFloat(w1Slider.value);
+        let w2 = parseFloat(w2Slider.value);
+        let w3 = parseFloat(w3Slider.value);
+        let theta = parseFloat(thetaSlider.value);
+
+        // Function to calculate the neuron output
+        function calculateNeuronOutput() {
+            const S = w1 * x1 + w2 * x2 + w3 * x3;
+            const y = S >= theta ? 1 : 0;
+            return { S, y };
+        }
+
+        // Function to update displayed values
+        function updateValues() {
+            x1Value.textContent = x1;
+            x2Value.textContent = x2;
+            x3Value.textContent = x3;
+            w1Value.textContent = w1;
+            w2Value.textContent = w2;
+            w3Value.textContent = w3;
+            thetaValue.textContent = theta;
+        }
+
+        // Function to draw the neuron diagram
+        function drawNeuron() {
+            const { S, y } = calculateNeuronOutput();
+
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw neuron circle
+            ctx.beginPath();
+            ctx.arc(400, 300, 50, 0, 2 * Math.PI);
+            ctx.fillStyle = '#ADD8E6';
+            ctx.fill();
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.font = '16px Arial';
+            ctx.fillStyle = '#000';
+            ctx.textAlign = 'center';
+            ctx.fillText('Neuron', 400, 305);
+
+            // Draw inputs
+            // x1
+            ctx.beginPath();
+            ctx.moveTo(100, 200);
+            ctx.lineTo(350, 275);
+            ctx.stroke();
+
+            ctx.fillText(`x₁ = ${x1}`, 80, 195);
+            ctx.fillText(`w₁ = ${w1}`, 80, 215);
+
+            // x2
+            ctx.beginPath();
+            ctx.moveTo(100, 300);
+            ctx.lineTo(350, 300);
+            ctx.stroke();
+
+            ctx.fillText(`x₂ = ${x2}`, 80, 295);
+            ctx.fillText(`w₂ = ${w2}`, 80, 315);
+
+            // x3
+            ctx.beginPath();
+            ctx.moveTo(100, 400);
+            ctx.lineTo(350, 325);
+            ctx.stroke();
+
+            ctx.fillText(`x₃ = ${x3}`, 80, 395);
+            ctx.fillText(`w₃ = ${w3}`, 80, 415);
+
+            // Draw output
+            ctx.beginPath();
+            ctx.moveTo(450, 300);
+            ctx.lineTo(700, 300);
+            ctx.stroke();
+
+            ctx.fillText(`y = ${y}`, 720, 305);
+
+            // Display weighted sum and threshold
+            ctx.fillText(`Weighted Sum S = ${S.toFixed(2)}`, 400, 200);
+            ctx.fillText(`Threshold θ = ${theta}`, 400, 400);
+        }
+
+        // Function to handle slider changes
+        function updateNeuron() {
+            x1 = parseInt(x1Slider.value);
+            x2 = parseInt(x2Slider.value);
+            x3 = parseInt(x3Slider.value);
+            w1 = parseFloat(w1Slider.value);
+            w2 = parseFloat(w2Slider.value);
+            w3 = parseFloat(w3Slider.value);
+            theta = parseFloat(thetaSlider.value);
+
+            updateValues();
+            drawNeuron();
+        }
+
+        // Add event listeners to sliders
+        x1Slider.addEventListener('input', updateNeuron);
+        x2Slider.addEventListener('input', updateNeuron);
+        x3Slider.addEventListener('input', updateNeuron);
+        w1Slider.addEventListener('input', updateNeuron);
+        w2Slider.addEventListener('input', updateNeuron);
+        w3Slider.addEventListener('input', updateNeuron);
+        thetaSlider.addEventListener('input', updateNeuron);
+
+        // Initial draw
+        updateValues();
+        drawNeuron();
+    </script>
+
+</body>
+</html>
