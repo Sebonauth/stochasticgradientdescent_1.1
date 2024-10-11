@@ -4,24 +4,86 @@
   <meta charset="UTF-8">
   <title>Interactive Loss Function Visualization</title>
   <!-- Include Plotly.js via CDN -->
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.16.1.min.js"></script>
+  <!-- Include MathJax for LaTeX rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
   <style>
-    /* Remove default margins and paddings */
-    body, html {
+    html, body {
       margin: 0;
       padding: 0;
-      overflow: hidden; /* Hide scrollbars */
+      overflow: hidden; /* Prevent scrollbars */
     }
-    /* Make the plot fill the entire viewport */
+
+    #container {
+      width: 100%;
+      height: 100%;
+      box-sizing: border-box;
+      padding: 20px; /* Padding inside the iframe */
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f7fa;
+    }
+
+    #plot-container {
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+      box-sizing: border-box;
+      height: 100%;
+      width: 100%;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
     #plot {
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: calc(100% - 120px); /* Adjust height based on other elements */
+    }
+
+    #info {
+      margin-top: 20px;
+    }
+
+    #info p {
+      font-size: 18px;
+      margin: 5px 0;
+    }
+
+    #info span {
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
 
-  <div id="plot"></div>
+  <div id="container">
+
+    <!-- Plot container with shadow border -->
+    <div id="plot-container">
+      <div id="plot"></div>
+
+      <div id="info">
+        <p>Model Parameter (\(\theta\)): <span id="theta-value">0</span></p>
+        <p>Loss (\(L(\theta)\)): <span id="loss-value">400</span></p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MathJax Configuration -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(','\\)'], ['\\[','\\]']],
+        processEscapes: true
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+  </script>
+
+  <!-- Plotly.js and MathJax Scripts -->
+  <script src="https://cdn.plot.ly/plotly-2.16.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 
   <script>
     // Hidden true value we're trying to predict
@@ -54,6 +116,7 @@
         x: thetaValues,
         y: lossValues,
         mode: 'lines',
+        name: 'Loss Function',
         line: { color: '#ff7f0e' },
         hoverinfo: 'none' // Disable tooltip for the loss function line
       },
@@ -61,6 +124,7 @@
         x: [currentTheta],
         y: [lossFunction(currentTheta)],
         mode: 'markers',
+        name: 'Current θ',
         marker: { color: '#1f77b4', size: 12 },
         hovertemplate: 'Model Parameter (θ): %{x:.2f}<br>Loss: %{customdata}<extra></extra>',
         customdata: [formatLoss(lossFunction(currentTheta))]
@@ -72,17 +136,18 @@
         title: 'Model Parameter (θ)',
         range: [-10, 50],
         zeroline: true,
-        showgrid: false,
-        fixedrange: true // Disable zooming on x-axis
+        showgrid: false
       },
       yaxis: {
         title: 'Loss',
         range: [0, 1600],
         zeroline: true,
-        showgrid: false,
-        fixedrange: true // Disable zooming on y-axis
+        showgrid: false
       },
       margin: { t: 20, l: 50, r: 20, b: 50 },
+      plot_bgcolor: '#f5f7fa',
+      paper_bgcolor: '#ffffff',
+      showlegend: false,
       hovermode: 'x', // Allows hovering over the x-axis
       dragmode: false // Disable zooming and panning
     };
@@ -119,6 +184,10 @@
         y: [[lossFunction(currentTheta)]],
         customdata: [[formatLoss(lossFunction(currentTheta))]]
       }, {}, [1]);
+
+      // Update the displayed θ and loss values
+      document.getElementById('theta-value').innerText = currentTheta.toFixed(2);
+      document.getElementById('loss-value').innerText = formatLoss(lossFunction(currentTheta));
     }
 
     // Initialize the displayed values
@@ -128,10 +197,15 @@
     plotElement.on('plotly_relayout', function(eventdata) {
       if (eventdata['xaxis.range[0]'] || eventdata['yaxis.range[0]']) {
         Plotly.relayout('plot', {
-          'xaxis.range': [-10, 50],
-          'yaxis.range': [0, 1600]
+          'xaxis.autorange': true,
+          'yaxis.autorange': true
         });
       }
+    });
+
+    // Adjust the plot size when the window or iframe resizes
+    window.addEventListener('resize', function() {
+      Plotly.Plots.resize(plotElement);
     });
 
   </script>
