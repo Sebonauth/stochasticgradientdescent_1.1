@@ -15,14 +15,18 @@
       margin: 0;
       padding: 20px;
     }
+
     #container {
       max-width: 800px;
       margin: 0 auto;
+      padding: 20px; /* Added padding */
     }
+
     /* Hidden equations section */
     #equations {
       display: none;
     }
+
     #plot-container {
       background-color: #ffffff;
       padding: 20px;
@@ -30,17 +34,21 @@
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
       margin-top: 30px;
     }
+
     #plot {
       width: 100%;
       max-width: 700px;
       margin: 0 auto;
     }
+
     #info {
       margin-top: 20px;
     }
+
     #info p {
       font-size: 18px;
     }
+
     #info span {
       font-weight: bold;
     }
@@ -158,8 +166,8 @@
     const config = {
       responsive: true,
       displayModeBar: false, // Hide the mode bar (toolbar)
-      staticPlot: false, // Keep interactivity
-      scrollZoom: false // Disable scroll zoom
+      staticPlot: false,     // Keep interactivity
+      scrollZoom: false      // Disable scroll zoom
     };
 
     Plotly.newPlot('plot', data, layout, config);
