@@ -1,185 +1,212 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>McCulloch-Pitts Neuron Interactive Visualization</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-        }
-
-        #controls {
-            display: none; /* Hide the controls as adjustments are in the diagram */
-        }
-
-        #neuronCanvas {
-            border: 1px solid #ccc;
-            margin-top: 20px;
-            cursor: pointer;
-        }
-
-        /* Tooltip styles */
-        .tooltip {
-            position: absolute;
-            background-color: #fff;
-            border: 1px solid #ccc;
-            padding: 5px;
-            display: none;
-            font-size: 14px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Interactive Loss Function Visualization</title>
+  <!-- Include Plotly.js via CDN -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <!-- Include MathJax for LaTeX rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      background-color: #f5f7fa;
+      margin: 0;
+      padding: 20px;
+    }
+    #container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    /* Hidden equations section */
+    #equations {
+      display: none;
+    }
+    #plot-container {
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      margin-top: 30px;
+    }
+    #plot {
+      width: 100%;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    #info {
+      margin-top: 20px;
+    }
+    #info p {
+      font-size: 18px;
+    }
+    #info span {
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
 
-    <canvas id="neuronCanvas" width="800" height="600"></canvas>
+  <div id="container">
 
-    <script>
-        // Canvas and context
-        const canvas = document.getElementById('neuronCanvas');
-        const ctx = canvas.getContext('2d');
+    <!-- Equations section is hidden -->
+    <div id="equations">
+      <p><strong>Model Equation:</strong></p>
+      <p class="equation">\(\hat{y} = \theta\)</p>
+      <p><strong>Loss Function:</strong></p>
+      <p class="equation">\(L(\theta) = (\hat{y} - y)^2\)</p>
+      <p>In this example, the model prediction \(\hat{y}\) is the parameter \(\theta\), and we're trying to match an unknown true value \(y\).</p>
+    </div>
 
-        // Initialize values
-        let x1 = 1, x2 = 0, x3 = 1;
-        let w1 = 2.0, w2 = -1.0, w3 = 1.0;
-        let theta = 2.0;
+    <!-- Plot container with shadow border -->
+    <div id="plot-container">
+      <div id="plot"></div>
 
-        // Positions for interactive elements
-        const positions = {
-            x1: { x: 80, y: 195, radius: 20 },
-            x2: { x: 80, y: 295, radius: 20 },
-            x3: { x: 80, y: 395, radius: 20 },
-            w1: { x: 80, y: 215, radius: 20 },
-            w2: { x: 80, y: 315, radius: 20 },
-            w3: { x: 80, y: 415, radius: 20 },
-            theta: { x: 400, y: 400, radius: 30 },
-        };
+      <div id="info">
+        <p>Model Parameter (\(\theta\)): <span id="theta-value">0</span></p>
+        <p>Loss (\(L(\theta)\)): <span id="loss-value">400</span></p>
+      </div>
+    </div>
 
-        // Function to calculate the neuron output
-        function calculateNeuronOutput() {
-            const S = w1 * x1 + w2 * x2 + w3 * x3;
-            const y = S >= theta ? 1 : 0;
-            return { S, y };
-        }
+  </div>
 
-        // Function to draw the neuron diagram
-        function drawNeuron() {
-            const { S, y } = calculateNeuronOutput();
+  <!-- MathJax Configuration -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(','\\)'], ['\\[','\\]']],
+        processEscapes: true
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+  </script>
 
-            // Clear canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+  <!-- Plotly.js and MathJax Scripts -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 
-            // Draw neuron circle
-            ctx.beginPath();
-            ctx.arc(400, 300, 50, 0, 2 * Math.PI);
-            ctx.fillStyle = '#ADD8E6';
-            ctx.fill();
-            ctx.lineWidth = 2;
-            ctx.stroke();
+  <script>
+    // Hidden true value we're trying to predict
+    const y_true = 20;
 
-            ctx.font = '16px Arial';
-            ctx.fillStyle = '#000';
-            ctx.textAlign = 'center';
-            ctx.fillText('Neuron', 400, 305);
+    // Define the loss function: L(θ) = (θ - y_true)^2
+    function lossFunction(theta) {
+      return Math.pow(theta - y_true, 2);
+    }
 
-            // Draw inputs
-            // x1
-            ctx.beginPath();
-            ctx.moveTo(100, 200);
-            ctx.lineTo(350, 275);
-            ctx.stroke();
+    // Generate data for the loss function curve
+    const thetaValues = [];
+    const lossValues = [];
+    for (let theta = -10; theta <= 50; theta += 0.1) {
+      thetaValues.push(theta);
+      lossValues.push(lossFunction(theta));
+    }
 
-            ctx.fillText(`x₁ = ${x1}`, positions.x1.x, positions.x1.y);
-            ctx.fillText(`w₁ = ${w1}`, positions.w1.x, positions.w1.y);
+    // Initial parameter value
+    let currentTheta = 0;
 
-            // x2
-            ctx.beginPath();
-            ctx.moveTo(100, 300);
-            ctx.lineTo(350, 300);
-            ctx.stroke();
+    // Function to format loss values, showing zero instead of very small numbers
+    function formatLoss(loss) {
+      return Math.abs(loss) < 1e-6 ? '0' : loss.toFixed(2);
+    }
 
-            ctx.fillText(`x₂ = ${x2}`, positions.x2.x, positions.x2.y);
-            ctx.fillText(`w₂ = ${w2}`, positions.w2.x, positions.w2.y);
+    // Plotly data and layout
+    const data = [
+      {
+        x: thetaValues,
+        y: lossValues,
+        mode: 'lines',
+        name: 'Loss Function',
+        line: { color: '#ff7f0e' },
+        hoverinfo: 'none' // Disable tooltip for the loss function line
+      },
+      {
+        x: [currentTheta],
+        y: [lossFunction(currentTheta)],
+        mode: 'markers',
+        name: 'Current θ',
+        marker: { color: '#1f77b4', size: 12 },
+        hovertemplate: 'Model Parameter (θ): %{x:.2f}<br>Loss: %{customdata}<extra></extra>',
+        customdata: [formatLoss(lossFunction(currentTheta))]
+      }
+    ];
 
-            // x3
-            ctx.beginPath();
-            ctx.moveTo(100, 400);
-            ctx.lineTo(350, 325);
-            ctx.stroke();
+    const layout = {
+      xaxis: {
+        title: 'Model Parameter (θ)',
+        range: [-10, 50],
+        zeroline: true,
+        showgrid: false
+      },
+      yaxis: {
+        title: 'Loss',
+        range: [0, 1600],
+        zeroline: true,
+        showgrid: false
+      },
+      margin: { t: 20 },
+      plot_bgcolor: '#f5f7fa',
+      paper_bgcolor: '#f5f7fa',
+      showlegend: false,
+      hovermode: 'x', // Allows hovering over the x-axis
+      dragmode: false // Disable zooming and panning
+    };
 
-            ctx.fillText(`x₃ = ${x3}`, positions.x3.x, positions.x3.y);
-            ctx.fillText(`w₃ = ${w3}`, positions.w3.x, positions.w3.y);
+    const config = {
+      responsive: true,
+      displayModeBar: false, // Hide the mode bar (toolbar)
+      staticPlot: false, // Keep interactivity
+      scrollZoom: false // Disable scroll zoom
+    };
 
-            // Draw output
-            ctx.beginPath();
-            ctx.moveTo(450, 300);
-            ctx.lineTo(700, 300);
-            ctx.stroke();
+    Plotly.newPlot('plot', data, layout, config);
 
-            ctx.fillText(`y = ${y}`, 720, 305);
+    // Add event listener for interacting with the plot
+    const plotElement = document.getElementById('plot');
 
-            // Display weighted sum and threshold
-            ctx.fillText(`Weighted Sum S = ${S.toFixed(2)}`, 400, 200);
-            ctx.fillText(`Threshold θ = ${theta}`, positions.theta.x, positions.theta.y);
-        }
+    plotElement.on('plotly_hover', function(eventdata) {
+      const x = eventdata.points[0].x;
+      updateCurrentTheta(x);
+    });
 
-        // Function to check if a point is inside a circle
-        function isInsideCircle(pos, x, y) {
-            const dx = pos.x - x;
-            const dy = pos.y - y;
-            return dx * dx + dy * dy <= pos.radius * pos.radius;
-        }
+    plotElement.on('plotly_click', function(eventdata) {
+      const x = eventdata.points[0].x;
+      updateCurrentTheta(x);
+    });
 
-        // Function to handle canvas clicks
-        canvas.addEventListener('click', function(event) {
-            const rect = canvas.getBoundingClientRect();
-            const xClick = event.clientX - rect.left;
-            const yClick = event.clientY - rect.top;
+    // Function to update the current θ and displayed values
+    function updateCurrentTheta(theta) {
+      currentTheta = theta;
 
-            // Check inputs
-            if (isInsideCircle(positions.x1, xClick, yClick)) {
-                x1 = x1 === 0 ? 1 : 0;
-                drawNeuron();
-            } else if (isInsideCircle(positions.x2, xClick, yClick)) {
-                x2 = x2 === 0 ? 1 : 0;
-                drawNeuron();
-            } else if (isInsideCircle(positions.x3, xClick, yClick)) {
-                x3 = x3 === 0 ? 1 : 0;
-                drawNeuron();
-            }
-            // Check weights
-            else if (isInsideCircle(positions.w1, xClick, yClick)) {
-                const newW1 = prompt('Enter new value for w₁:', w1);
-                if (newW1 !== null && !isNaN(parseFloat(newW1))) {
-                    w1 = parseFloat(newW1);
-                    drawNeuron();
-                }
-            } else if (isInsideCircle(positions.w2, xClick, yClick)) {
-                const newW2 = prompt('Enter new value for w₂:', w2);
-                if (newW2 !== null && !isNaN(parseFloat(newW2))) {
-                    w2 = parseFloat(newW2);
-                    drawNeuron();
-                }
-            } else if (isInsideCircle(positions.w3, xClick, yClick)) {
-                const newW3 = prompt('Enter new value for w₃:', w3);
-                if (newW3 !== null && !isNaN(parseFloat(newW3))) {
-                    w3 = parseFloat(newW3);
-                    drawNeuron();
-                }
-            }
-            // Check threshold
-            else if (isInsideCircle(positions.theta, xClick, yClick)) {
-                const newTheta = prompt('Enter new value for θ:', theta);
-                if (newTheta !== null && !isNaN(parseFloat(newTheta))) {
-                    theta = parseFloat(newTheta);
-                    drawNeuron();
-                }
-            }
+      // Update the marker position and customdata for tooltip
+      Plotly.update('plot', {
+        x: [[currentTheta]],
+        y: [[lossFunction(currentTheta)]],
+        customdata: [[formatLoss(lossFunction(currentTheta))]]
+      }, {}, [1]);
+
+      // Update the displayed θ and loss values
+      document.getElementById('theta-value').innerText = currentTheta.toFixed(2);
+      document.getElementById('loss-value').innerText = formatLoss(lossFunction(currentTheta));
+    }
+
+    // Initialize the displayed values
+    updateCurrentTheta(currentTheta);
+
+    // Prevent zooming and panning
+    plotElement.on('plotly_relayout', function(eventdata) {
+      if (eventdata['xaxis.range[0]'] || eventdata['yaxis.range[0]']) {
+        Plotly.relayout('plot', {
+          'xaxis.autorange': true,
+          'yaxis.autorange': true
         });
+      }
+    });
 
-        // Initial draw
-        drawNeuron();
-    </script>
+  </script>
 
 </body>
 </html>
