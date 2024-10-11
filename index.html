@@ -12,6 +12,7 @@
       margin: 0;
       padding: 0;
       overflow: hidden; /* Prevent scrollbars */
+      height: 100%; /* Ensure the body takes full height */
     }
 
     #container {
@@ -28,14 +29,14 @@
       padding: 20px;
       border-radius: 8px;
       box-sizing: border-box;
-      height: 100%;
+      height: calc(100% - 40px); /* Adjust based on container padding */
       width: 100%;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
 
     #plot {
       width: 100%;
-      height: calc(100% - 120px); /* Adjust height based on other elements */
+      height: calc(100% - 80px); /* Adjust height based on #info and padding */
     }
 
     #info {
