@@ -1,215 +1,190 @@
-<!DOCTYPE html>
+CTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Interactive Loss Function Visualization</title>
-  <!-- Include Plotly.js via CDN -->
-  <script src="https://cdn.plot.ly/plotly-2.16.1.min.js"></script>
-  <!-- Include MathJax for LaTeX rendering -->
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden; /* Prevent scrollbars */
-      height: 100%; /* Ensure the body takes full height */
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gradient Descent Visualization</title>
+    <!-- Load Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <!-- Load MathJax for LaTeX rendering -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
-    #container {
-      width: 100%;
-      height: 100%;
-      box-sizing: border-box;
-      padding: 40px; /* Increased padding from 20px to 40px */
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #ffffff;
-    }
+    <style>
+        /* Overall page styling */
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #ffffff; /* White for background outside the box */
+            margin: 0;
+            padding: 0;
+        }
 
-    #plot-container {
-      background-color: #ffffff;
-      padding: 20px;
-      border-radius: 8px;
-      box-sizing: border-box;
-      height: calc(100% - 80px); /* Adjusted based on increased container padding */
-      width: 100%;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background-color: #f2f1ef; /* Light warm grey inside the container */
+            border-radius: 8px;
+            margin-top: 40px;
+            text-align: center; /* Center content inside the container */
+        }
 
-    #plot {
-      width: 100%;
-      height: calc(100% - 80px); /* Adjust height based on #info and padding */
-    }
+        /* Center the plot */
+        #plot {
+            display: block;
+            margin: 0 auto;
+            width: 100%;
+        }
 
-    #info {
-      margin-top: 40px;
-    }
-
-    #info p {
-      font-size: 18px;
-      margin: 5px 0;
-    }
-
-    #info span {
-      font-weight: bold;
-    }
-  </style>
+        /* Responsive styling */
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px 10px;
+            }
+        }
+    </style>
 </head>
 <body>
-
-  <div id="container">
-
-    <!-- Plot container with shadow border -->
-    <div id="plot-container">
-      <div id="plot"></div>
-
-      <div id="info">
-        <p>Model Parameter (\(\theta\)): <span id="theta-value">0</span></p>
-        <p>Loss (\(L(\theta)\)): <span id="loss-value">400</span></p>
-      </div>
+    <div class="container">
+        <div id="plot"></div>
     </div>
 
-  </div>
+    <script>
+        // Gradient function
+        function gradient(x) {
+            return 2 * x; // Derivative of f(x) = x^2
+        }
 
-  <!-- MathJax Configuration -->
-  <script>
-    window.MathJax = {
-      tex: {
-        inlineMath: [['\\(','\\)'], ['\\[','\\]']],
-        processEscapes: true
-      },
-      svg: {
-        fontCache: 'global'
-      }
-    };
-  </script>
+        // Function to animate gradient descent
+        function plotGradientDescent() {
+            let xValues = [];
+            let yValues = [];
+            let pathX = [];
+            let pathY = [];
 
-  <!-- Plotly.js and MathJax Scripts -->
-  <script src="https://cdn.plot.ly/plotly-2.16.1.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+            // Generate x values for the function f(x) = x^2
+            for (let i = -10; i <= 10; i += 0.1) {
+                xValues.push(i);
+                yValues.push(i * i);  // f(x) = x^2
+            }
 
-  <script>
-    // Hidden true value we're trying to predict
-    const y_true = 20;
+            // Gradient Descent with fixed learning rate of 0.1
+            let x = 4;  // Starting point x = 4
+            const learningRate = 0.1;
 
-    // Define the loss function: L(θ) = (θ - y_true)^2
-    function lossFunction(theta) {
-      return Math.pow(theta - y_true, 2);
-    }
+            // Initial point
+            pathX.push(x);
+            pathY.push(x * x);
 
-    // Generate data for the loss function curve
-    const thetaValues = [];
-    const lossValues = [];
-    for (let theta = -10; theta <= 50; theta += 0.1) {
-      thetaValues.push(theta);
-      lossValues.push(lossFunction(theta));
-    }
+            // Perform one step of gradient descent
+            const xNew = x - learningRate * gradient(x); // New x value after one step
+            pathX.push(xNew);
+            pathY.push(xNew * xNew);
 
-    // Initial parameter value
-    let currentTheta = 0;
+            // Plot the function
+            const functionPlot = {
+                x: xValues,
+                y: yValues,
+                mode: 'lines',
+                line: { color: '#2980b9', width: 5 },
+                name: 'f(x) = x^2',
+                hoverinfo: 'none'  // Disable hover info for this trace
+            };
 
-    // Function to format loss values, showing zero instead of very small numbers
-    function formatLoss(loss) {
-      return Math.abs(loss) < 1e-6 ? '0' : loss.toFixed(2);
-    }
+            // Plot the initial point at x = 4
+            const initialPointPlot = {
+                x: [pathX[0]],
+                y: [pathY[0]],
+                mode: 'markers',
+                marker: { color: '#e74c3c', size: 12 },
+                name: 'Gradient Descent Start',
+                hoverinfo: 'none'  // Disable hover info for this trace
+            };
 
-    // Plotly data and layout
-    const data = [
-      {
-        x: thetaValues,
-        y: lossValues,
-        mode: 'lines',
-        name: 'Loss Function',
-        line: { color: '#ff7f0e' },
-        hoverinfo: 'none' // Disable tooltip for the loss function line
-      },
-      {
-        x: [currentTheta],
-        y: [lossFunction(currentTheta)],
-        mode: 'markers',
-        name: 'Current θ',
-        marker: { color: '#1f77b4', size: 12 },
-        hovertemplate: 'Model Parameter (θ): %{x:.2f}<br>Loss: %{customdata}<extra></extra>',
-        customdata: [formatLoss(lossFunction(currentTheta))]
-      }
-    ];
+            // Plot the point that moves
+            const animatedPointPlot = {
+                x: [pathX[0]],  // Start at x = 4
+                y: [pathY[0]],
+                mode: 'markers',
+                marker: { color: '#f1c40f', size: 12 },
+                name: 'Moving Point',
+                hoverinfo: 'none'  // Disable hover info for this trace
+            };
 
-    const layout = {
-      xaxis: {
-        title: 'Model Parameter (θ)',
-        range: [-10, 50],
-        zeroline: true,
-        showgrid: false
-      },
-      yaxis: {
-        title: 'Loss',
-        range: [0, 1000],
-        zeroline: true,
-        showgrid: false
-      },
-      margin: { t: 20, l: 50, r: 20, b: 50 },
-      plot_bgcolor: '#f5f7fa',
-      paper_bgcolor: '#ffffff',
-      showlegend: false,
-      hovermode: 'x', // Allows hovering over the x-axis
-      dragmode: false // Disable zooming and panning
-    };
+            const layout = {
+                autosize: true, // Ensure the chart resizes to the iframe
+                xaxis: {
+                    title: 'x',
+                    titlefont: { size: 18, color: '#34495e' },
+                    linewidth: 2, // Thicker axis lines
+                    fixedrange: true
+                },
+                yaxis: {
+                    title: 'f(x)',
+                    titlefont: { size: 18, color: '#34495e' },
+                    linewidth: 2, // Thicker axis lines
+                    fixedrange: true
+                },
+                plot_bgcolor: '#ecf0f1',
+                paper_bgcolor: '#f2f1ef', /* Light warm grey inside the plot as well */
+                showlegend: false, // Hide the legend
+                margin: { l: 70, r: 70, b: 70, t: 50 }, // Adjusted margins to avoid cutting
+                height: 500,  // Adjust height to fit iframe better
+                hovermode: false  // Disable hover mode globally
+            };
 
-    const config = {
-      responsive: true,
-      displayModeBar: false, // Hide the mode bar (toolbar)
-      staticPlot: false,     // Keep interactivity
-      scrollZoom: false      // Disable scroll zoom
-    };
+            const config = {
+                displayModeBar: false  // Hide the Plotly toolbar
+            };
 
-    Plotly.newPlot('plot', data, layout, config);
+            // Initial plot with two points (initial point and moving point)
+            Plotly.newPlot('plot', [functionPlot, initialPointPlot, animatedPointPlot], layout, config);
 
-    // Add event listener for interacting with the plot
-    const plotElement = document.getElementById('plot');
+            // Function to animate the moving point
+            function animatePoint() {
+                Plotly.animate('plot', {
+                    data: [{ x: [pathX[1]], y: [pathY[1]] }],
+                    traces: [2],
+                    layout: {}
+                }, {
+                    transition: {
+                        duration: 1000,
+                        easing: 'cubic-in-out'
+                    },
+                    frame: {
+                        duration: 1000
+                    }
+                }).then(() => {
+                    // After the animation, reset the point back to x = 4 and repeat the loop
+                    setTimeout(() => {
+                        Plotly.animate('plot', {
+                            data: [{ x: [pathX[0]], y: [pathY[0]] }],
+                            traces: [2],
+                            layout: {}
+                        }, {
+                            transition: {
+                                duration: 0, // Instant reset to start
+                            },
+                            frame: {
+                                duration: 0
+                            }
+                        });
+                        animatePoint(); // Repeat the loop
+                    }, 500); // Short pause before restarting the animation
+                });
+            }
 
-    plotElement.on('plotly_hover', function(eventdata) {
-      const x = eventdata.points[0].x;
-      updateCurrentTheta(x);
-    });
+            // Start the animation loop
+            animatePoint();
+        }
 
-    plotElement.on('plotly_click', function(eventdata) {
-      const x = eventdata.points[0].x;
-      updateCurrentTheta(x);
-    });
-
-    // Function to update the current θ and displayed values
-    function updateCurrentTheta(theta) {
-      currentTheta = theta;
-
-      // Update the marker position and customdata for tooltip
-      Plotly.update('plot', {
-        x: [[currentTheta]],
-        y: [[lossFunction(currentTheta)]],
-        customdata: [[formatLoss(lossFunction(currentTheta))]]
-      }, {}, [1]);
-
-      // Update the displayed θ and loss values
-      document.getElementById('theta-value').innerText = currentTheta.toFixed(2);
-      document.getElementById('loss-value').innerText = formatLoss(lossFunction(currentTheta));
-    }
-
-    // Initialize the displayed values
-    updateCurrentTheta(currentTheta);
-
-    // Prevent zooming and panning
-    plotElement.on('plotly_relayout', function(eventdata) {
-      if (eventdata['xaxis.range[0]'] || eventdata['yaxis.range[0]']) {
-        Plotly.relayout('plot', {
-          'xaxis.autorange': true,
-          'yaxis.autorange': true
-        });
-      }
-    });
-
-    // Adjust the plot size when the window or iframe resizes
-    window.addEventListener('resize', function() {
-      Plotly.Plots.resize(plotElement);
-    });
-
-  </script>
-
+        // Ensure the plot renders fully centered on initial load
+        window.onload = function() {
+            setTimeout(() => {
+                plotGradientDescent();
+                MathJax.typeset();  // Rerender LaTeX equations
+            }, 100);  // Add a slight delay to ensure container sizes are calculated correctly
+        };
+    </script>
 </body>
 </html>
