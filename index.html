@@ -121,18 +121,21 @@
                     title: 'x',
                     titlefont: { size: 18, color: '#34495e' },
                     linewidth: 2, // Thicker axis lines
-                    fixedrange: true
+                    fixedrange: true,
+                    tickangle: 0, // Ensure tick labels are readable
+                    automargin: true  // Automatically adjust margins
                 },
                 yaxis: {
                     title: 'f(x)',
                     titlefont: { size: 18, color: '#34495e' },
                     linewidth: 2, // Thicker axis lines
-                    fixedrange: true
+                    fixedrange: true,
+                    automargin: true  // Automatically adjust margins
                 },
                 plot_bgcolor: '#ecf0f1',
                 paper_bgcolor: '#f2f1ef', /* Light warm grey inside the plot as well */
                 showlegend: false, // Hide the legend
-                margin: { l: 70, r: 70, b: 20, t: 20 }, // Reduce bottom and top margin
+                margin: { l: 70, r: 70, b: 50, t: 10 }, // Adjust top and bottom margins for better spacing
                 height: 400,  // Adjust height to fit iframe better
                 hovermode: false  // Disable hover mode globally
             };
