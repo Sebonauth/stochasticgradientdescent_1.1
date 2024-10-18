@@ -15,22 +15,18 @@
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
             background-color: #ffffff; /* White for background outside the box */
-            margin: 0; /* Remove any default margins */
+            margin: 0;
             padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
         }
 
         .container {
             max-width: 900px;
-            padding: 20px;
+            margin: 0 auto;
+            padding: 40px 20px;
             background-color: #f2f1ef; /* Light warm grey inside the container */
             border-radius: 8px;
+            margin-top: 40px;
             text-align: center; /* Center content inside the container */
-            box-sizing: border-box; /* Ensure padding does not add to width */
-            margin: 0 auto;
         }
 
         /* Center the plot */
@@ -121,22 +117,19 @@
                     title: 'x',
                     titlefont: { size: 18, color: '#34495e' },
                     linewidth: 2, // Thicker axis lines
-                    fixedrange: true,
-                    tickangle: 0, // Ensure tick labels are readable
-                    automargin: true  // Automatically adjust margins
+                    fixedrange: true
                 },
                 yaxis: {
                     title: 'f(x)',
                     titlefont: { size: 18, color: '#34495e' },
                     linewidth: 2, // Thicker axis lines
-                    fixedrange: true,
-                    automargin: true  // Automatically adjust margins
+                    fixedrange: true
                 },
                 plot_bgcolor: '#ecf0f1',
                 paper_bgcolor: '#f2f1ef', /* Light warm grey inside the plot as well */
                 showlegend: false, // Hide the legend
-                margin: { l: 70, r: 70, b: 50, t: 10 }, // Adjust top and bottom margins for better spacing
-                height: 400,  // Adjust height to fit iframe better
+                margin: { l: 70, r: 70, b: 70, t: 50 }, // Adjusted margins to avoid cutting
+                height: 500,  // Adjust height to fit iframe better
                 hovermode: false  // Disable hover mode globally
             };
 
